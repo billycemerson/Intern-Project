@@ -1,0 +1,255 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+
+Memuat paket-paket yang diperlukan
+```{r}
+library(tidyverse)
+library(VGAM)
+library(nnet)
+library(caret)
+library(readr)
+library(generalhoslem)
+library(pscl)
+library(ROSE)
+```
+
+Data
+```{r}
+pkl <- read.csv("data_pkl.csv")
+data <- subset(pkl, Status_Akhir %in% c("SEMBUH", "MENINGGAL"))
+data = subset(data, select = -c(Tahun))
+```
+
+```{r}
+data <- data %>%
+  mutate_all(as.factor)
+str(data)
+```
+
+Summary
+```{r}
+summary(data)
+```
+
+```{r}
+data$Sesak_Nafas <- relevel(data$Sesak_Nafas, ref="0")
+data$Gangguan_Makan <- relevel(data$Gangguan_Makan, ref="0")
+data$DM <- relevel(data$DM, ref="0")
+data$HT <- relevel(data$HT, ref="0")
+data$Umur <- factor(data$Umur, levels = c("<=50", ">50"))
+data$Status_Covid.19 <- factor(data$Status_Covid.19, levels = c("SUSPECT", "PROBABLE", "KONFIRMASI"))
+data$Perawatan <- factor(data$Perawatan, levels = c("RALAN", "RANAP", "IGD"))
+data$Status_Akhir <- relevel(data$Status_Akhir, ref="SEMBUH")
+```
+
+```{r}
+unique(data$Jenis_Kelamin)
+unique(data$Status_Covid.19)
+unique(data$Perawatan)
+unique(data$Sesak_Nafas)
+unique(data$Gangguan_Makan)
+unique(data$DM)
+unique(data$HT)
+unique(data$Umur)
+unique(data$Status_Akhir)
+```
+
+Spliting Data
+```{r}
+set.seed(2024)
+index <- sample(nrow(data), 0.7*nrow(data))
+train <- data[index,]
+valid <- data[-index,]
+```
+
+```{r}
+table(valid$Status_Akhir)
+```
+
+Handling Imbalance Data Using ROSE
+```{r}
+table(train$Status_Akhir)
+```
+
+Data sebelum dilakukan ROSE
+```{r}
+# Membuat barplot
+bar <- barplot(prop.table(table(train$Status_Akhir)), 
+               main = "Distribusi Status Akhir Sebelum ROSE", 
+               ylim = c(0, max(prop.table(table(train$Status_Akhir))) + 0.05))
+
+# Menghitung frekuensi absolut
+counts <- table(train$Status_Akhir)
+
+# Menambahkan teks (jumlah) di atas tengah bar
+text(bar, prop.table(counts) + 0.02, labels = counts, cex = 0.8)
+```
+
+```{r}
+train_rose <- ROSE(Status_Akhir ~ ., data = train, seed = 2024)$data
+```
+
+```{r}
+table(train_rose$Status_Akhir)
+```
+
+Data setelah dilakukan ROSE
+```{r}
+# Membuat barplot
+bar <- barplot(prop.table(table(train_rose$Status_Akhir)), 
+               main = "Distribusi Status Akhir Setelah ROSE", 
+               ylim = c(0, max(prop.table(table(train_rose$Status_Akhir))) + 0.05))
+
+# Menghitung frekuensi absolut
+counts <- table(train_rose$Status_Akhir)
+
+# Menambahkan teks (jumlah) di atas tengah bar
+text(bar, prop.table(counts) + 0.02, labels = counts, cex = 0.8)
+```
+
+```{r}
+str(train_rose)
+```
+
+Uji independensi
+
+1. Variabel Jenis Kelamin
+```{r}
+tabel_kontingensi1 <- table(train_rose$Jenis_Kelamin, train_rose$Status_Akhir)
+hasil_chisq1 <- chisq.test(tabel_kontingensi1)
+hasil_chisq1
+```
+
+2. Variabel Umur
+```{r}
+tabel_kontingensi2 <- table(train_rose$Umur, train_rose$Status_Akhir)
+hasil_chisq2 <- chisq.test(tabel_kontingensi2)
+hasil_chisq2
+```
+
+3. Variabel Status.Covid.19
+```{r}
+tabel_kontingensi3 <- table(train_rose$Status_Covid.19, train_rose$Status_Akhir)
+hasil_chisq3 <- chisq.test(tabel_kontingensi3)
+hasil_chisq3
+```
+
+4. Variabel Perawatan
+```{r}
+tabel_kontingensi4 <- table(train_rose$Perawatan, train_rose$Status_Akhir)
+hasil_chisq4 <- chisq.test(tabel_kontingensi4)
+hasil_chisq4
+```
+
+5. Variabel Sesak_Nafas
+```{r}
+tabel_kontingensi5 <- table(train_rose$Sesak_Nafas, train_rose$Status_Akhir)
+hasil_chisq5 <- chisq.test(tabel_kontingensi5)
+hasil_chisq5
+```
+
+6. Variabel Gangguan Makan
+```{r}
+tabel_kontingensi6 <- table(train_rose$Gangguan_Makan, train_rose$Status_Akhir)
+hasil_chisq6 <- chisq.test(tabel_kontingensi6)
+hasil_chisq6
+```
+
+7. Variabel DM
+```{r}
+tabel_kontingensi7 <- table(train_rose$DM, train_rose$Status_Akhir)
+hasil_chisq7 <- chisq.test(tabel_kontingensi7)
+hasil_chisq7
+```
+
+8. Variabel HT
+```{r}
+tabel_kontingensi8 <- table(train_rose$HT, train_rose$Status_Akhir)
+hasil_chisq8 <- chisq.test(tabel_kontingensi8)
+hasil_chisq8
+```
+
+Hasil uji independensi menunjukan bahwa terdapat varibel jenis kelamin tidak berpengaruh signifikan terhadap status akhir pasien covid-19, sehingga variabel tersebut tidak dimasukan dalam pembentukan model
+
+
+```{r}
+train_baru = subset(train_rose, select = -(Jenis_Kelamin))
+str(train_baru)
+```
+
+Regresi Logistik (Model Semua Variabel)
+```{r}
+mlog <-  glm(Status_Akhir~., data = train_baru, family = binomial)
+summary(mlog)
+```
+
+Uji Signifikan Serentak
+```{r}
+pR2(mlog)
+```
+
+```{r}
+qchisq(0.95,6)
+```
+
+Uji Signifikan Parsial
+```{r}
+summary(mlog)
+```
+
+```{r}
+mlog2 <-  glm(Status_Akhir~ Umur+Status_Covid.19+Perawatan+Sesak_Nafas+Gangguan_Makan, data = train_baru, family = binomial)
+summary(mlog2)
+```
+
+Rasio odds
+```{r}
+exp(coef((mlog)))
+```
+
+Uji Kesesuaian Model
+```{r}
+logitgof(train_baru$Status_Akhir,fitted(mlog2))
+```
+
+```{r}
+qchisq(0.95,5)
+```
+
+Prediksi
+```{r}
+# Prediksi probabilitas pada data validasi
+problog <- predict(mlog2, valid, type = "response")
+
+# Prediksi biner berdasarkan ambang batas 0.5
+predlog <- rep("SEMBUH", nrow(valid))  # Default prediksi adalah "SEMBUH"
+predlog[problog > 0.5] <- "MENINGGAL"  # Jika probabilitas > 0.5, prediksi "MENINGGAL"
+
+# Pastikan kelas dalam predlog sama dengan kelas dalam valid$Status_Akhir
+predlog <- factor(predlog, levels = c("SEMBUH", "MENINGGAL"))
+valid$Status_Akhir <- factor(valid$Status_Akhir, levels = c("SEMBUH", "MENINGGAL"))
+```
+
+Confusion Matrix Model Regresi Logistik
+```{r}
+contingency_table <- table(predlog, valid$Status_Akhir)
+contingency_table
+```
+
+```{r}
+conf_matrix <- confusionMatrix(contingency_table)
+conf_matrix
+```
+
+```{r}
+#citation("ROSE")
+```
+
+```{r}
+#RStudio.Version()
+```
+
+
