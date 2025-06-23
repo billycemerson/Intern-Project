@@ -6,7 +6,7 @@ An exploratory data analysis using **binary logistic regression** to uncover key
 
 ## 🚀 Key Features
 
-- Cleaned and preprocessed clinical data from 174 patients (2021–2023)
+- Cleaned and preprocessed clinical data from 580 patients (2021–2023)
 - Extracted structured variables from unstructured symptom and treatment notes
 - Performed statistical analysis:
   - Chi-square independence test
