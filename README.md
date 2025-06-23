@@ -1,35 +1,39 @@
-# 🩺 COVID-19 Mortality Risk Factors Analysis  
+# 🩺 COVID-19 Mortality Risk Factors Analysis
+
 An exploratory data analysis using **binary logistic regression** to uncover key mortality risk factors among COVID-19 patients at **Pratama Hospital Yogyakarta**.
 
 ---
 
 ## 🚀 Key Features
 
-- Cleaned and preprocessed clinical data of 174 patients (2021–2023)
-- Extracted structured variables from symptoms and treatment notes
+- Cleaned and preprocessed clinical data from 174 patients (2021–2023)
+- Extracted structured variables from unstructured symptom and treatment notes
 - Performed statistical analysis:
   - Chi-square independence test
-  - Binary logistic regression (overall and partial tests)
+  - Binary logistic regression (overall and partial significance tests)
   - Odds ratio interpretation
-- Evaluated model using:
+- Evaluated model performance using:
   - Accuracy
   - Precision
   - Recall
   - F1 Score
-- Presented findings with practical recommendations for hospital action and future research directions
+- Delivered findings with practical recommendations for hospital policy and future research
 
 ---
 
 ## 🛠️ Setup & Execution
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/billycemerson/COVID19-Mortality-Analysis.git
 ````
 
 2. Open the `.Rmd` file using **RStudio**
-3. Install required packages (see below)
-4. Knit the document to `.docx` or `.pdf` for final output
+
+3. Install the required R packages (see below)
+
+4. Knit the document to `.docx` or `.pdf` for final reporting
 
 ---
 
@@ -37,13 +41,19 @@ An exploratory data analysis using **binary logistic regression** to uncover key
 
 ### 🔍 Significant Risk Factors (Odds Ratio)
 
-* **Age > 50** → 11.46× more likely to die
-* **Confirmed COVID-19 status** → 2.95× more likely to die
-* **Outpatient care** → 55.17× more likely to die
-* **Eating disorders** → 66.54× more likely to die
-* **Shortness of breath** → 2.67× less likely to die
+| Variable                | Odds Ratio | Interpretation                            |
+| ----------------------- | ---------- | ----------------------------------------- |
+| Age > 50                | 11.46×     | Much higher risk of death                 |
+| Confirmed COVID-19 case | 2.95×      | Increased risk                            |
+| Outpatient care         | 55.17×     | Substantially higher mortality risk       |
+| Eating disorders        | 66.54×     | Extremely high mortality risk             |
+| Shortness of breath     | 0.37×      | Lower risk — potentially counterintuitive |
 
-### 📈 Model Evaluation on Test Data
+> Note: Odds ratio < 1 indicates a *lower* likelihood of death.
+
+---
+
+### 📈 Model Evaluation (Test Data)
 
 * **Accuracy**: 60.3%
 * **Precision**: 54.5%
@@ -52,9 +62,9 @@ An exploratory data analysis using **binary logistic regression** to uncover key
 
 ---
 
-## 🧩 R Dependencies
+## 📦 R Dependencies
 
-Make sure the following packages are installed in your R environment:
+Make sure to install the following R packages before running the analysis:
 
 ```r
 install.packages(c(
@@ -67,6 +77,6 @@ install.packages(c(
 
 ## 📄 License
 
-This project is open-source and licensed under the MIT License.
+This project is open-source and licensed under the **MIT License**.
 
----
+```
