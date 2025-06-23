@@ -26,7 +26,7 @@ An exploratory data analysis using **binary logistic regression** to uncover key
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/billycemerson/COVID19-Mortality-Analysis.git
+   git clone https://github.com/billycemerson/Intern-Project.git
    ```
 
 2. Open the `.Rmd` file using **RStudio**
