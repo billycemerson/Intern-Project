@@ -20,8 +20,6 @@ An exploratory data analysis using **binary logistic regression** to uncover key
 
 ---
 
----
-
 ## 🛠️ Setup & Execution
 
 1. Clone the repository:
